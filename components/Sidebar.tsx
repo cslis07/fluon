@@ -133,8 +133,7 @@ export default function Sidebar() {
 
       <div className="side-foot">
         <div className="kdca">
-          <Image src="/kdca-logo-white.png" alt="KDCA" width={34} height={34} />
-          <span>질병관리청<br />KDCA</span>
+          <Image src="/kdca-logo-white.png" alt="질병관리청 KDCA" width={150} height={56} />
         </div>
         <div className="dept">
           담당부서

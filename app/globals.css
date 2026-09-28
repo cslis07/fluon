@@ -247,17 +247,10 @@ button {
 .side-foot .kdca {
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 .side-foot .kdca img {
-  width: 34px;
-  height: 34px;
-}
-.side-foot .kdca span {
-  font-size: 13px;
-  line-height: 1.35;
-  color: #e6eef6;
-  font-weight: 600;
+  width: 150px;
+  height: auto;
 }
 .side-foot .dept {
   margin-top: 14px;
