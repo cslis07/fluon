@@ -1,0 +1,26 @@
+{
+  "name": "fluon",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FluON — 인플루엔자·호흡기감염병 감시 대시보드 (KDCA 공개 데이터 시각화)",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "harvest": "node scripts/harvest.mjs",
+    "build-data": "node scripts/build-data.mjs"
+  },
+  "dependencies": {
+    "next": "15.1.6",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "recharts": "2.15.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.5",
+    "@types/react": "19.0.7",
+    "@types/react-dom": "19.0.3",
+    "typescript": "5.7.3"
+  }
+}
