@@ -100,6 +100,11 @@ export default function SeriesChartPage({ cfg }: { cfg: ChartPageCfg }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [seriesDefs]
   );
+  const colorByLabel = useMemo(
+    () => Object.fromEntries(selectable.map((s) => [s.label, s.color])),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [seriesDefs]
+  );
   const selectedLabels = selectable.filter((s) => selected.includes(s.key)).map((s) => s.label);
 
   const foot =
@@ -128,6 +133,7 @@ export default function SeriesChartPage({ cfg }: { cfg: ChartPageCfg }) {
               label={cfg.seriesLabel}
               values={selectedLabels}
               options={seriesLabels}
+              colors={colorByLabel}
               onChange={(labels) => setSelected(labels.map((l) => labelToKey[l]))}
             />
           </div>
@@ -146,27 +152,28 @@ export default function SeriesChartPage({ cfg }: { cfg: ChartPageCfg }) {
         {status === "loading" && <div className="chart-state">데이터를 불러오는 중…</div>}
         {status === "error" && <div className="chart-state">데이터 조회 중 오류가 발생했습니다.</div>}
         {status === "ok" && (
-          <ResponsiveContainer width="100%" height={430}>
-            <LineChart data={rows} margin={{ top: 10, right: 20, bottom: 30, left: 0 }}>
+          <ResponsiveContainer width="100%" height={540}>
+            <LineChart data={rows} margin={{ top: 16, right: 28, bottom: 34, left: 4 }}>
               <CartesianGrid stroke="#eef2f6" vertical={false} />
               <XAxis
                 dataKey="week_label"
                 interval={0}
                 angle={-90}
                 textAnchor="end"
-                height={54}
-                tick={{ fontSize: 10, fill: "#8595a6" }}
+                height={58}
+                tick={{ fontSize: 11, fill: "#8595a6" }}
+                tickMargin={8}
                 tickLine={false}
                 axisLine={{ stroke: "#d7e0e8" }}
               />
               <YAxis
-                tick={{ fontSize: 12, fill: "#8595a6" }}
+                tick={{ fontSize: 12.5, fill: "#8595a6" }}
                 tickLine={false}
                 axisLine={false}
-                width={44}
+                width={46}
               />
               <Tooltip
-                contentStyle={{ borderRadius: 10, border: "1px solid #dce6ee", fontSize: 13 }}
+                contentStyle={{ borderRadius: 10, border: "1px solid #dce6ee", fontSize: 13, boxShadow: "0 8px 22px rgba(18,61,104,0.14)" }}
                 labelStyle={{ color: "#123d68", fontWeight: 700 }}
               />
               {marker && (

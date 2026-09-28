@@ -65,12 +65,14 @@ export function MultiSelect({
   options,
   onChange,
   format,
+  colors,
 }: {
   label: string;
   values: string[];
   options: string[];
   onChange: (v: string[]) => void;
   format?: (v: string) => string;
+  colors?: Record<string, string>;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useOutside(() => setOpen(false));
@@ -88,16 +90,23 @@ export function MultiSelect({
         <Caret />
       </button>
       {open && (
-        <div className="popover">
-          <button className="opt" onClick={() => onChange(allSelected ? [] : options.slice())}>
-            <span className="chk">{allSelected ? "✓" : ""}</span>
-            <span>전체 선택</span>
-          </button>
+        <div className="popover ms-pop">
+          <div className="ms-head">
+            <span className="ms-title">{label}</span>
+            {/* clicking again when all are selected clears the selection */}
+            <button
+              className={"ms-all" + (allSelected ? " on" : "")}
+              onClick={() => onChange(allSelected ? [] : options.slice())}
+            >
+              전체 선택
+            </button>
+          </div>
           {options.map((o) => {
             const sel = values.includes(o);
             return (
               <button key={o} className={"opt" + (sel ? " sel" : "")} onClick={() => toggle(o)}>
                 <span className="chk">{sel ? "✓" : ""}</span>
+                {colors?.[o] && <span className="opt-dot" style={{ background: colors[o] }} />}
                 <span>{fmt(o)}</span>
               </button>
             );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Area, AreaChart, ResponsiveContainer } from "recharts";
+import { Area, AreaChart, ResponsiveContainer, Tooltip } from "recharts";
 import { SingleSelect } from "@/components/Selectors";
 
 type MetricKey = "ili" | "ari" | "sari" | "kriss" | "lab" | "nedis";
@@ -131,7 +131,7 @@ function MetricCard({ cfg, m }: { cfg: (typeof CARDS)[number]; m: MetricVal }) {
     change = cfg.pp ? cur - prev : ((cur - prev) / Math.abs(prev)) * 100;
     up = cur >= prev;
   }
-  const trend = (m?.trend || []).map((t) => ({ label: t.label, value: t.value }));
+  const trend = (m?.trend || []).map((t) => ({ label: t.label, season: t.season, value: t.value }));
   const color = up ? "var(--up)" : "var(--down)";
   return (
     <div className="card metric-card">
@@ -161,7 +161,14 @@ function MetricCard({ cfg, m }: { cfg: (typeof CARDS)[number]; m: MetricVal }) {
                     <stop offset="100%" stopColor="#7fb2e0" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <Area type="monotone" dataKey="value" stroke="#4a90d0" strokeWidth={2} fill={`url(#g-${cfg.key})`} isAnimationActive={false} connectNulls dot={false} />
+                <Tooltip
+                  cursor={{ stroke: "#c7d6e4", strokeWidth: 1 }}
+                  content={<SparkTooltip unit={cfg.unit} />}
+                  wrapperStyle={{ zIndex: 20 }}
+                  allowEscapeViewBox={{ x: true, y: true }}
+                  offset={12}
+                />
+                <Area type="monotone" dataKey="value" stroke="#4a90d0" strokeWidth={2} fill={`url(#g-${cfg.key})`} isAnimationActive={false} connectNulls dot={{ r: 2, fill: "#fff", stroke: "#4a90d0", strokeWidth: 1.4 }} activeDot={{ r: 4 }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -171,6 +178,24 @@ function MetricCard({ cfg, m }: { cfg: (typeof CARDS)[number]; m: MetricVal }) {
             ))}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function SparkTooltip({ active, payload, unit }: any) {
+  if (!active || !payload || !payload.length) return null;
+  const p = payload[0].payload as { label: string; season?: string; value: number | null };
+  if (p.value == null) return null;
+  return (
+    <div className="spark-tip">
+      <div className="st-1">
+        {p.season ? p.season + " " : ""}
+        {p.label}
+      </div>
+      <div className="st-2">
+        {p.value}
+        <span>{unit}</span>
       </div>
     </div>
   );

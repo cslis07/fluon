@@ -105,6 +105,31 @@
 .metric-spark {
   height: 74px;
 }
+.spark-tip {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 8px 22px rgba(18, 61, 104, 0.16);
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+.spark-tip .st-1 {
+  font-size: 12px;
+  color: var(--slate-500);
+  font-weight: 600;
+}
+.spark-tip .st-2 {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--navy-800);
+  margin-top: 2px;
+}
+.spark-tip .st-2 span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--slate-500);
+  margin-left: 2px;
+}
 .spark-labels {
   display: flex;
   justify-content: space-between;
