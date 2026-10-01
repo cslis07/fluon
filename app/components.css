@@ -478,3 +478,37 @@
   font-weight: 800;
   color: var(--navy-800);
 }
+
+/* ---- mobile overrides (must load after base rules) <=640px ---- */
+@media (max-width: 640px) {
+  .region-controls {
+    flex-wrap: wrap;
+  }
+  .region-controls .selector {
+    flex: 1 1 44%;
+    min-width: 0;
+  }
+  .ov-head {
+    gap: 14px;
+  }
+  .ov-selects {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .ov-selects .selector {
+    flex: 1 1 44%;
+  }
+  .ov-selects .select-box {
+    min-width: 0;
+  }
+  .detail-body {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .stage-legend {
+    overflow: hidden;
+  }
+  .sl-desc {
+    font-size: 12px;
+  }
+}

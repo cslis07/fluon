@@ -64,7 +64,8 @@ export default function SeriesChartPage({ cfg }: { cfg: ChartPageCfg }) {
           // ili-seasonal exposes `seasons`; comparison exposes `availableSeries`
           const seasons: string[] = d.availableSeries || d.seasons || [];
           defs = seasons.map((s) => ({ key: s, label: s, color: seasonColor(s) }));
-          defSel = d.selectedSeasons || seasons.slice();
+          // original defaults to the 3 most recent seasons on every 절기별 page
+          defSel = d.selectedSeasons || seasons.slice(-3);
         } else if (cfg.kind === "subtype") {
           const subs: string[] = d.subtypes || [];
           defs = [

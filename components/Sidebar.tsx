@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NAV, NavNode } from "@/config/nav";
 
 function Icon({ name }: { name: string }) {
@@ -62,8 +62,30 @@ export default function Sidebar() {
   const toggle = (k: string) => setOpen((s) => ({ ...s, [k]: !s[k] }));
   const toggleG = (k: string) => setOpenGroup((s) => ({ ...s, [k]: !s[k] }));
 
+  // mobile off-canvas drawer
+  const [mobileOpen, setMobileOpen] = useState(false);
+  useEffect(() => {
+    setMobileOpen(false); // close drawer whenever the route changes
+  }, [pathname]);
+
   return (
-    <aside className="sidebar">
+    <>
+      <div className="mobile-bar">
+        <button
+          className="hamburger"
+          aria-label="메뉴 열기"
+          onClick={() => setMobileOpen((o) => !o)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+        <Link href="/" className="mobile-brand">
+          <Image src="/fluon-logo.png" alt="FluON" width={104} height={43} />
+        </Link>
+      </div>
+      {mobileOpen && <div className="drawer-overlay" onClick={() => setMobileOpen(false)} />}
+      <aside className={"sidebar" + (mobileOpen ? " open" : "")}>
       <div className="brand">
         <Link href="/">
           <Image src="/fluon-logo.png" alt="FluON" width={150} height={62} priority />
@@ -140,6 +162,7 @@ export default function Sidebar() {
           <strong>질병관리청 감염병관리과</strong>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
