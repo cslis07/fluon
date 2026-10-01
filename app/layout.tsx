@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import "./components.css";
 import Sidebar from "@/components/Sidebar";
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Sidebar />
           <main className="main">{children}</main>
         </div>
+        <Analytics />
       </body>
     </html>
   );
