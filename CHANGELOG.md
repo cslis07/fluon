@@ -1,5 +1,10 @@
 # 변경 이력 (CHANGELOG)
 
+## 2026-10-01 — Vercel Analytics 연결
+
+- **[ADD]** `@vercel/analytics` 설치 + 루트 레이아웃에 `<Analytics />` 추가
+  (방문 측정). 실제 수집 시작은 Vercel 대시보드에서 Web Analytics 활성화 필요.
+
 ## 2026-10-01 — 모바일 대응 · 후속 점검
 
 - **[ADD]** 모바일(≤900px) 레이아웃: 상단 바 + 햄버거 오프캔버스 드로어, 콘텐츠
