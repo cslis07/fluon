@@ -1,10 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Area, AreaChart, ResponsiveContainer } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import PageHeader from "@/components/PageHeader";
-import { SingleSelect } from "@/components/Selectors";
-import { choroplethColor } from "@/lib/colors";
+import { SingleSelect, MultiSelect } from "@/components/Selectors";
+import ChartActions from "@/components/ChartActions";
+import { categorical, choroplethColor } from "@/lib/colors";
+import { downloadCSV, downloadChartPNG, Column } from "@/lib/download";
 
 interface RegionData {
   seasons: string[];
@@ -47,10 +59,27 @@ export default function RegionView() {
   const mapRef = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string>("");
 
+  // region overlay comparison
+  const [trendRows, setTrendRows] = useState<any[]>([]);
+  const [trendRegions, setTrendRegions] = useState<string[]>([]);
+  const [cmpRegions, setCmpRegions] = useState<string[]>([]);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     fetch("/korea-ili-choropleth.svg")
       .then((r) => r.text())
       .then(setSvg)
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/region-trend", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((res) => {
+        setTrendRows(res.chartData || []);
+        setTrendRegions(res.regions || []);
+        setCmpRegions((res.regions || []).slice(0, 5)); // default: top 5 by latest ILI
+      })
       .catch(() => {});
   }, []);
 
@@ -228,9 +257,71 @@ export default function RegionView() {
         </div>
       </div>
 
-      <p className="chart-foot">
+      <p className="chart-foot" style={{ marginBottom: 22 }}>
         * 선택한 절기·주차의 지역별 전체 ILI를 색상으로 비교하고, 선택 지역의 전체 및 연령별 ILI를 확인할 수 있습니다.
       </p>
+
+      {trendRows.length > 0 && (
+        <div className="card chart-card">
+          <div className="chart-head">
+            <span className="chart-pill">지역 비교</span>
+            <h2 className="chart-title">지역별 ILI 추이 비교</h2>
+            <div className="chart-controls">
+              <MultiSelect
+                label="지역 선택"
+                values={cmpRegions}
+                options={trendRegions}
+                colors={Object.fromEntries(cmpRegions.map((r) => [r, categorical(cmpRegions.indexOf(r))]))}
+                onChange={setCmpRegions}
+              />
+            </div>
+          </div>
+          <div className="chart-subbar">
+            <span className="chart-unit">단위: 외래환자 1천명 당</span>
+            <ChartActions
+              onCSV={() =>
+                downloadCSV(
+                  "FluON_지역별_ILI_추이비교.csv",
+                  [{ key: "week_label", label: "주차" }, ...cmpRegions.map((r) => ({ key: r, label: r }))] as Column[],
+                  trendRows
+                )
+              }
+              onPNG={() =>
+                downloadChartPNG(overlayRef.current, {
+                  title: "지역별 ILI 추이 비교",
+                  subtitle: "단위: 외래환자 1천명 당",
+                  legend: cmpRegions.map((r) => ({ label: r, color: categorical(cmpRegions.indexOf(r)) })),
+                  filename: "FluON_지역별_ILI_추이비교.png",
+                })
+              }
+            />
+          </div>
+          <div className="chart-legend">
+            {cmpRegions.map((r, i) => (
+              <span className="legend-item" key={r}>
+                <span className="legend-dot" style={{ background: categorical(i) }} />
+                {r}
+              </span>
+            ))}
+          </div>
+          <div ref={overlayRef}>
+            <ResponsiveContainer width="100%" height={360}>
+              <LineChart data={trendRows} margin={{ top: 14, right: 24, bottom: 8, left: 4 }}>
+                <CartesianGrid stroke="#eef2f6" vertical={false} />
+                <XAxis dataKey="week_label" tick={{ fontSize: 12, fill: "#8595a6" }} tickLine={false} axisLine={{ stroke: "#d7e0e8" }} />
+                <YAxis tick={{ fontSize: 12.5, fill: "#8595a6" }} tickLine={false} axisLine={false} width={46} />
+                <Tooltip contentStyle={{ borderRadius: 10, border: "1px solid #dce6ee", fontSize: 13 }} labelStyle={{ color: "#123d68", fontWeight: 700 }} />
+                {cmpRegions.map((r, i) => (
+                  <Line key={r} type="monotone" dataKey={r} stroke={categorical(i)} strokeWidth={2} dot={{ r: 3, fill: "#fff", stroke: categorical(i), strokeWidth: 1.6 }} activeDot={{ r: 5 }} connectNulls isAnimationActive={false} />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="chart-foot">
+            * 원본 지역별 감시 데이터는 현재 절기(최근 주차)만 공개되어 추이는 최근 3주 범위로 표시됩니다. 여러 지역을 선택해 겹쳐 비교할 수 있습니다.
+          </p>
+        </div>
+      )}
     </>
   );
 }

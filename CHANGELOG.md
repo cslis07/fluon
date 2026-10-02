@@ -1,5 +1,16 @@
 # 변경 이력 (CHANGELOG)
 
+## 2026-10-02 — 데이터 활용 기능 4종
+
+- **[ADD]** 모든 차트에 **CSV 다운로드 · PNG 저장** 버튼(제목·범례 포함 PNG 합성,
+  UTF-8 BOM CSV). (참고: CDC FluView·Our World in Data)
+- **[ADD]** 지역별 화면에 **여러 지역 겹쳐 비교** 추이 차트(`/api/region-trend`).
+  원본 지역 데이터가 현재 절기 3주만 공개 → 3주 범위로 표시.
+- **[ADD]** 홈 **전 절기 동주 대비 요약 카드**(`/api/season-compare`) — ILI 문장 +
+  6개 지표 증감 칩.
+- **[ADD]** 선택한 절기·계열을 **URL 쿼리에 저장**해 같은 화면 링크 공유
+  (`?season=&series=`), 로드 시 복원.
+
 ## 2026-10-01 — Vercel Analytics 연결
 
 - **[ADD]** `@vercel/analytics` 설치 + 루트 레이아웃에 `<Analytics />` 추가

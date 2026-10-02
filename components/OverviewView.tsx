@@ -15,10 +15,17 @@ interface Overview {
   weeks: { unique_week_key: number; week_label: string; data_available?: boolean; threshold?: number }[];
   selectedSeason: string;
   selectedWeekKey: number;
-  selectedWeek: { week_label: string; threshold: number; start_dt: string };
+  selectedWeek: { week: number; week_label: string; threshold: number; start_dt: string };
   latestDataWeek: { start_dt: string };
   metrics: Record<MetricKey, MetricVal>;
   vaccination: { senior: number | null; child: number | null };
+}
+
+interface SeasonCompare {
+  season: string;
+  prevSeason: string | null;
+  week: number;
+  metrics: Record<string, { current: number | null; previous: number | null }>;
 }
 
 const CARDS: { key: MetricKey; title: string; unit: string; pp: boolean }[] = [
@@ -47,6 +54,21 @@ export default function OverviewView() {
   const [weekKey, setWeekKey] = useState<number | null>(null);
   const [d, setD] = useState<Overview | null>(null);
   const [status, setStatus] = useState<"loading" | "ok" | "error">("loading");
+  const [compare, setCompare] = useState<SeasonCompare | null>(null);
+
+  // same-week comparison vs previous season
+  useEffect(() => {
+    if (!d?.selectedSeason || !d.selectedWeek?.week) return;
+    let cancel = false;
+    const qs = new URLSearchParams({ season: d.selectedSeason, week: String(d.selectedWeek.week) });
+    fetch(`/api/season-compare?${qs.toString()}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((res: SeasonCompare) => !cancel && setCompare(res))
+      .catch(() => {});
+    return () => {
+      cancel = true;
+    };
+  }, [d?.selectedSeason, d?.selectedWeek?.week]);
 
   useEffect(() => {
     let cancel = false;
@@ -111,6 +133,10 @@ export default function OverviewView() {
               <MetricCard key={c.key} cfg={c} m={d.metrics[c.key]} />
             ))}
           </div>
+
+          {compare && compare.prevSeason && (
+            <SeasonCompareCard compare={compare} week={d.selectedWeek?.week_label} />
+          )}
 
           <div className="ov-bottom">
             <StageCard ili={d.metrics.ili.current} threshold={d.selectedWeek?.threshold} season={d.selectedSeason} week={d.selectedWeek?.week_label} />
@@ -178,6 +204,64 @@ function MetricCard({ cfg, m }: { cfg: (typeof CARDS)[number]; m: MetricVal }) {
             ))}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function SeasonCompareCard({ compare, week }: { compare: SeasonCompare; week?: string }) {
+  const SHORT: { key: string; label: string }[] = [
+    { key: "ili", label: "ILI 분율" },
+    { key: "ari", label: "ARI" },
+    { key: "sari", label: "SARI" },
+    { key: "nedis", label: "NEDIS" },
+    { key: "kriss", label: "K-RISS" },
+    { key: "lab", label: "LAB" },
+  ];
+  const pct = (cur: number | null, prev: number | null) => {
+    if (cur == null || prev == null || prev === 0) return null;
+    return ((cur - prev) / Math.abs(prev)) * 100;
+  };
+  const ili = compare.metrics.ili;
+  const iliPct = pct(ili?.current, ili?.previous);
+  const up = iliPct != null && iliPct >= 0;
+  const col = up ? "var(--up)" : "var(--down)";
+
+  return (
+    <div className="card compare-card">
+      <div className="compare-tag">전 절기 동주 대비</div>
+      <div className="compare-main">
+        인플루엔자 의사환자(ILI) 분율은 <b>{compare.season} {week}</b> 기준 <b>{fmt(ili?.current)}</b>
+        {" "}(1천명 당)로, 전 절기({compare.prevSeason}) 같은 주 <b>{fmt(ili?.previous)}</b> 대비{" "}
+        {iliPct == null ? (
+          <span className="cmp-na">비교 불가</span>
+        ) : (
+          <span className="cmp-strong" style={{ color: col }}>
+            {up ? "▲" : "▼"} {up ? "+" : "−"}
+            {Math.abs(iliPct).toFixed(0)}%
+          </span>
+        )}
+        입니다.
+      </div>
+      <div className="compare-chips">
+        {SHORT.map((s) => {
+          const mv = compare.metrics[s.key];
+          const p = pct(mv?.current, mv?.previous);
+          const u = p != null && p >= 0;
+          return (
+            <div className="cmp-chip" key={s.key}>
+              <span className="cc-label">{s.label}</span>
+              {p == null ? (
+                <span className="cc-na">—</span>
+              ) : (
+                <span className="cc-val" style={{ color: u ? "var(--up)" : "var(--down)" }}>
+                  {u ? "▲" : "▼"} {u ? "+" : "−"}
+                  {Math.abs(p).toFixed(0)}%
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
